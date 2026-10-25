@@ -1,0 +1,24 @@
+[project]
+name = "gr2neo4j"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Nora Viktoria Sterbinszky", email = "Nora-Viktoria.Sterbinszky@telekom.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "langchain-community>=0.4.2",
+    "langchain-core>=1.6.12",
+    "langchain-neo4j>=0.11.0",
+    "langchain-openai>=1.7.2",
+    "neo4j>=6.4.1",
+    "wikipedia>=1.4.0",
+]
+
+[project.scripts]
+gr2neo4j = "gr2neo4j:main"
+
+[build-system]
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
