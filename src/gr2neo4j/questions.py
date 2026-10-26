@@ -45,8 +45,8 @@ QUESTIONS = [
     MATCH (d:Document)
     RETURN count(d) AS OsszesDokumentum, OsszesChunk, round(AtlagosChunkHossz) AS AtlagosChunkKarakterhossz
     """, 
-
-
+    
+    
     """
     MATCH (europe:Region {name: 'Európa'})
     MATCH (c:Country)-[:LOCATED_IN*1..]->(europe)

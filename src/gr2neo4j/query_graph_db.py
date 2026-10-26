@@ -1,7 +1,7 @@
 from langchain_neo4j import GraphCypherQAChain, Neo4jGraph
-from langchain_openai import ChatOpenAI
+from langchain_ollama import ChatOllama
 
-from src.gr2neo4j.questions import QUESTIONS
+from gr2neo4j.questions import QUESTIONS
 
 
 def setup_graph_rag(graph: Neo4jGraph, chat_model):
@@ -11,7 +11,7 @@ def setup_graph_rag(graph: Neo4jGraph, chat_model):
     print("-" * 50)
     
     chain = GraphCypherQAChain.from_llm(
-        llm=ChatOpenAI(name=chat_model, temperature=0),
+        llm=ChatOllama(model=chat_model, temperature=0),
         graph=graph,
         top_k=50,
         validate_cypher=True,
@@ -23,9 +23,11 @@ def setup_graph_rag(graph: Neo4jGraph, chat_model):
 
 
 def run_diagnostic_report(graph: Neo4jGraph):
-    print("\n" + "="*60)
-    print("KORPUSZ SZERKEZETI ÉS DIAGNOSZTIKAI RIPORTJA")
-    print("="*60)
+    rt = "KORPUSZ SZERKEZETI ÉS DIAGNOSZTIKAI RIPORTJA"
+    
+    print("\n" + "=" * rt.__len__())
+    print(rt)
+    print("=" * rt.__len__())
     
     # 1. Lekérdezés: Leghosszabb dokumentum
     r1 = graph.query(QUESTIONS[0])
@@ -71,7 +73,7 @@ def run_diagnostic_report(graph: Neo4jGraph):
         print(f"  - Adatbázisban lévő összes chunk: {r5[0]['OsszesChunk']} db")
         print(f"  - Chunkok átlagos hossza: {r5[0]['AtlagosChunkKarakterhossz']} karakter")
         
-    print("\n" + "-"*60 + "\n")
+    print("\n" + "-" * 80 + "\n")
     
     # 6. Lekérdezés: Hány vállalatcsoportnak vagy márkának van főhadiszállása egy adott kontinensen (pl. Európa)?
     r6 = graph.query(QUESTIONS[5])
@@ -99,4 +101,4 @@ def run_diagnostic_report(graph: Neo4jGraph):
     else:
         print("  - Nincs adat a vállalatcsoportokra vonatkozóan.")
     
-    print("\n" + "="*60)
+    print("\n" + "=" * 80)

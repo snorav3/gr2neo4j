@@ -1,3 +1,6 @@
+import time
+
+import wikipedia
 from langchain_community.document_loaders import WikipediaLoader
 from langchain_community.graphs import Neo4jGraph
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -6,23 +9,35 @@ from gr2neo4j.cyphers import CYPHERS
 
 
 def upsert_domain_graph(graph: Neo4jGraph):
-    with graph:
-        for idx, cypher in enumerate(CYPHERS, 1):
-            graph.query(cypher)
-            print(f"[{idx}/{len(CYPHERS)}] sikeresen végrehajtva")
+    ##with graph:
+    #for idx, cypher in enumerate(CYPHERS, 1):
+    #    graph.query(cypher)
+    #    print(f"[{idx}/{len(CYPHERS)}] sikeresen végrehajtva")
+    print(f"{len(CYPHERS)} db CYPHER-utasítás kötegelt végrehajtása...")
+    
+    batch_query = """
+    CALL apoc.cypher.runMany($queries, {})
+    """
+    
+    try:
+        #graph.query(batch_query, {"queries": CYPHERS})
+        combined_queries = ";\n".join(CYPHERS)
+        graph.query(batch_query, {"queries": combined_queries})
+        print("Minden CYPHER-utasítás sikeresen végrehajtva!")
+    except Exception as e:
+        print(f"Hiba történt a batch végrehajtása közben: {e}")
 
 
+wikipedia.set_user_agent("GepjarmuGrafExtrakcio/1.0 (kapcsolat: snorav3@gmail.com)")
 
 def upsert_graph_from_wiki_pages(graph: Neo4jGraph, pages):
     wiki_chunks_data = load_and_chunk_wikipedia(pages)
     
     if wiki_chunks_data:
         upsert_document_graph(graph, wiki_chunks_data)
-        print("\nA dokumentum-gráf sikeresen elkészült!")
+        print("A dokumentum-gráf sikeresen elkészült!")
     else:
         print("Nem sikerült adatot letölteni a Wikipédiáról.")
-    
-    upsert_document_graph(wiki_chunks_data)
     
 
 def load_and_chunk_wikipedia(pages):
@@ -53,16 +68,21 @@ def load_and_chunk_wikipedia(pages):
                     "chunks": chunks
                 }
                 print(f"Létrejött {len(chunks)} db chunk a(z) '{page}' oldalhoz.")
+            else:
+                print(f"Nem található tartalom a(z) '{page}' oldalhoz.")
         except Exception as e:
             print(f"Hiba a(z) '{page}' oldal letöltésekor: {e}")
             
+        time.sleep(1.5)
+        
     return all_chunks
 
 
 def upsert_document_graph(graph: Neo4jGraph, graph_data):    
     print("\nAdatok feltöltése a Neo4j-be...")
     
-    for data in graph_data.items():
+    #for data in graph_data.items(): ==> for page_key, data in graph_data.items(): ==>
+    for data in graph_data.values():
         doc_title = data["title"]
         source_url = data["source_url"]
         chunks = data["chunks"]
